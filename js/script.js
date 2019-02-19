@@ -1,11 +1,12 @@
-window.addEventListener('DOMContentLoader', () => {
+window.addEventListener('DOMContentLoaded', () => {
+
 	const cartWrapper = document.querySelector('.cart__wrapper'),
 		cart = document.querySelector('.cart'),
 		close = document.querySelector('.cart__close'),
 		open = document.querySelector('#cart'),
 		goodsBtn = document.querySelectorAll('.goods__btn'),
 		products = document.querySelectorAll('.goods__item'),
-		cofirm = document.querySelector('.confirm'),
+		confirm = document.querySelector('.confirm'),
 		badge = document.querySelector('.nav__badge'),
 		totalCost = document.querySelector('.cart__total > span'),
 		titles = document.querySelectorAll('.goods__title');
@@ -32,6 +33,9 @@ window.addEventListener('DOMContentLoader', () => {
 
 			trigger.remove();
 
+			showConfirm();
+			calcGoods(1);
+
 			removeBtn.classList.add('goods__item-remove');
 			removeBtn.innerHTML = '&times';
 			item.appendChild(removeBtn);
@@ -40,6 +44,75 @@ window.addEventListener('DOMContentLoader', () => {
 			if (empty) {
 				empty.remove();
 			}
+
+			calcTotal();
+			removeFromCart();
 		});
 	});
+
+	function sliceTitle() {
+		titles.forEach(function (item) {
+			if (item.textContent.length < 80) {
+				return;
+			} else {
+				const str = item.textContent.slice(0, 71) + '...';
+				item.textContent = str;
+			}
+		});
+	}
+
+	sliceTitle();
+
+	function showConfirm() {
+		confirm.style.display = 'block';
+		let counter = 100;
+		const id = setInterval(frame, 10);
+
+		function frame() {
+			if (counter == 10) {
+				clearInterval(id);
+				confirm.style.display = 'none';
+			} else {
+				counter--;
+				confirm.style.transform = `translateY(-${counter}px)`;
+				confirm.style.opacity = '.' + counter;
+			}
+		}
+	}
+
+	function calcGoods(i) {
+		const items = cartWrapper.querySelectorAll('.goods__item');
+		badge.textContent = i + items.length;
+	}
+
+	function calcTotal() {
+		const prices = document.querySelectorAll('.cart__wrapper > .goods__item > .goods__price > span');
+		let total = 0;
+		prices.forEach(function (item) {
+			total += +item.textContent;
+		});
+		totalCost.textContent = total;
+	}
+
+	function removeFromCart() {
+		const removeBtn = cartWrapper.querySelectorAll('.goods__item-remove');
+		removeBtn.forEach(function (btn) {
+			btn.addEventListener('click', () => {
+				btn.parentElement.remove();
+				calcGoods(0);
+				calcTotal();
+				if (badge.textContent == 0) {
+					addEmpty();
+				}
+			});
+		});
+	}
+
+	function addEmpty() {
+		const div = document.createElement('div');
+		div.classList.add('empty');
+		div.textContent = 'Ваша корзина пока пуста';
+		cartWrapper.appendChild(div);
+	}
+
 })
